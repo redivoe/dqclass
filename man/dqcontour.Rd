@@ -16,7 +16,7 @@ Directional quantile contours
 library(mvtnorm)
 set.seed(2)
 X <- rmvnorm(n = 200, mean = c(10, 2), sigma = matrix(c(1, 0.9, 0.9, 2), 2, 2))
-contour <- dqcontour(u = 0.9, X = X, weighted = FALSE)
+contour <- dqcontour(u = 0.9, X = X)
 
 plot(X, cex = 0.5)
 points(rbind(contour, contour[1,]), col = 2, lwd = 3, type = "l")
