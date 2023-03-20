@@ -60,6 +60,21 @@ get_depths <- function(X, theta_k, distr, n_dir){
   return(depths)
 }
 
+get_depth <- function(x, theta, distr){
+
+  cdf <- switch(
+    distr,
+    fgld = pfgld,
+    normal = function(x, theta) stats::pnorm(q = x, mean = theta[1], sd = theta[2]),
+    # kde = function(x, theta) rowMeans(pnorm(q = outer(x, theta$x, "-"), mean = 0, sd = theta$bw))
+    kde = function(x, theta) stats::approx(theta$x, theta$Fhat, xout = x, rule = 2, ties = "ordered")$y
+  )
+
+  depths <- cdf(x, theta) |>
+    depth_from_u()
+
+  return(depths)
+}
 
 ##--------------------------
 ##  Sphering and centering

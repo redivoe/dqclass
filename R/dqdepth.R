@@ -23,6 +23,7 @@ get_quantiles <- function(u, theta, distr){
 #' @param n_dir Number of directions to consider. They are equally spaced in two dimensions and uniformly sampled for higher dimensions.
 #' @param distr The distribution that is fit to each univariate directional projection.
 #' @param weighted A logical indicating whether weights for the directions should be computed.
+#' @param sphered A logical indicating whether groups should be sphered.
 #'
 #' @return A list containing:
 #' * `theta`: a list of dimension `n_dir` containing the estimated parameters for each univariate directional projection.
@@ -42,7 +43,13 @@ get_quantiles <- function(u, theta, distr){
 #'   geom_point()+
 #'   scale_color_viridis_c()
 #'
-dqdepth <- function(z, X, S, n_dir = 1e3, distr = "normal", weighted = FALSE){
+dqdepth <- function(z,
+                    X,
+                    S,
+                    n_dir = 1e3,
+                    distr = "normal",
+                    sphered = TRUE,
+                    weighted = FALSE) {
 
   out <- dqdepth_fit(X = X, S = S, n_dir = n_dir, distr = distr, weighted = weighted)
 
@@ -114,14 +121,13 @@ dqdepth_fit <- function(X, S, n_dir = 1e3, distr = "normal", weighted = FALSE){
 
 #' Directional quantile contours
 #'
-#' @param u
-#' @param X
-#' @param S
-#' @param n_dir
-#' @param distr
-#' @param weighted
+#'
+#' @inheritParams dqdepth
+#' @param u Level of the contour that is required.
 #'
 #' @return
+#' A matrix containing the points in that form the contour.
+#'
 #' @export
 #'
 #' @examples
@@ -133,7 +139,12 @@ dqdepth_fit <- function(X, S, n_dir = 1e3, distr = "normal", weighted = FALSE){
 #' plot(X, cex = 0.5)
 #' points(rbind(contour, contour[1,]), col = 2, lwd = 3, type = "l")
 #'
-dqcontour <- function(u, X, S, n_dir = 1e3, distr = "normal", weighted = FALSE){
+dqcontour <- function(u,
+                      X,
+                      S,
+                      n_dir = 1e3,
+                      distr = "normal",
+                      weighted = FALSE){
   out <- dqdepth_fit(X = X, S = S, n_dir = n_dir, distr = distr, weighted = weighted)
 
   q <- get_quantiles(u = u,

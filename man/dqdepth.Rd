@@ -4,7 +4,15 @@
 \alias{dqdepth}
 \title{Directional quantile depth}
 \usage{
-dqdepth(z, X, S, n_dir = 1000, distr = "normal", weighted = FALSE)
+dqdepth(
+  z,
+  X,
+  S,
+  n_dir = 1000,
+  distr = "normal",
+  sphered = TRUE,
+  weighted = FALSE
+)
 }
 \arguments{
 \item{z}{Point(s) whose depth is to be computed. If omitted the depths are computed for the points in \code{X}.}
@@ -16,6 +24,8 @@ dqdepth(z, X, S, n_dir = 1000, distr = "normal", weighted = FALSE)
 \item{n_dir}{Number of directions to consider. They are equally spaced in two dimensions and uniformly sampled for higher dimensions.}
 
 \item{distr}{The distribution that is fit to each univariate directional projection.}
+
+\item{sphered}{A logical indicating whether groups should be sphered.}
 
 \item{weighted}{A logical indicating whether weights for the directions should be computed.}
 }

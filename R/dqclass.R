@@ -1,13 +1,9 @@
 
 #' Directional quantile classifier
 #'
+#' @inheritParams dqdepth
 #' @param X A data matrix with observations in rows and variables in columns.
 #' @param y A vector of class labels for each sample of the training set.
-#' @param distr The distribution that is fit to each univariate directional projection.
-#' @param n_dir Number of directions to consider. They are equally spaced in two dimensions and uniformly sampled for higher dimensions.
-#' @param S A matrix containing the directions in the columns.
-#' @param weighted A logical indicating whether weights for the directions should be computed.
-#' @param sphered A logical indicating whether groups should be sphered.
 #' @param predicted A logical indicating whether the predicted values from the training sample should be returned.
 #'
 #' @return A list containing:
@@ -37,6 +33,28 @@ dqclass_train <- function(X, y,
     kde = kdeF
   )
 
+  # univariate data
+  if(is.vector(X) || ncol(X) == 1){
+    X_split <- lapply(by(X, y, identity), as.matrix)
+    K <- length(unique(y))
+    theta <- lapply(X_split, fit_fun)
+
+    cl <- match.call()
+    out <- list(
+      "theta" = theta,
+      "distr" = distr,
+      "univariate" = TRUE,
+      "call" = cl
+    )
+
+    if(predicted){
+      out <- c(out,
+               predict_dqclass(out, X))
+    }
+
+    return(out)
+  }
+
   if(missing(S)){
     if(ncol(X) == 2){
       S <- get_equi_S(B = n_dir)
@@ -51,8 +69,6 @@ dqclass_train <- function(X, y,
             appropriate dimensions. The number of rows must equal the dimension of the samples in X.")
     }
   }
-
-
 
   K <- length(unique(y))
 
@@ -78,6 +94,7 @@ dqclass_train <- function(X, y,
     "distr" = distr,
     "weighted" = weighted,
     "sphered" = sphered,
+    "univariate" = FALSE,
     "call" = cl
   )
 
@@ -100,38 +117,50 @@ dqclass_train <- function(X, y,
   if(sphered){
     out$sphere <-  sphere
   }
+
   if(predicted){
     out <- c(out,
-             predict_dqclass(X, out))
+             predict_dqclass(out, X))
   }
 
   return(out)
 }
 
 
-predict_dqclass <- function(X, out_train){
+predict.dq <- function(dq, ...){
+  predict()
+}
+
+predict_dqclass <- function(out_train, X){
 
   X <- as.matrix(X)
 
-  if(out_train$sphered){
-    Xs_split <- lapply(out_train$sphere, \(W_k) X %*% W_k)
-    Xs_split_proj <- lapply(Xs_split, \(X_k) X_k %*% out_train$S)
-    depths <- mapply(FUN = \(X, theta) get_depths(X, theta, out_train$distr, out_train$n_dir),
-                     Xs_split_proj, out_train$theta,
-                     SIMPLIFY = FALSE)
-  }else{
-    X_proj <- X %*% out_train$S
-    depths <- lapply(out_train$theta,
-                     \(theta_k) get_depths(X_proj, theta_k , out_train$distr, out_train$n_dir))
-  }
+  if(out_train$univariate){
 
-  if(out_train$weighted){
-    depths <- sapply(depths, \(x) sweep(x, 2, out_train$w, "*") |> rowSums())
-    depths <- depths / sum(out_train$w)
+    depths <- sapply(out_train$theta, \(theta) get_depth(X, theta, out_train$distr))
+
   }else{
 
-    depths <- sapply(depths, rowMeans)
+    if(out_train$sphered){
+      Xs_split <- lapply(out_train$sphere, \(W_k) X %*% W_k)
+      Xs_split_proj <- lapply(Xs_split, \(X_k) X_k %*% out_train$S)
+      depths <- mapply(FUN = \(X, theta) get_depths(X, theta, out_train$distr, out_train$n_dir),
+                       Xs_split_proj, out_train$theta,
+                       SIMPLIFY = FALSE)
+    }else{
+      X_proj <- X %*% out_train$S
+      depths <- lapply(out_train$theta,
+                       \(theta_k) get_depths(X_proj, theta_k , out_train$distr, out_train$n_dir))
+    }
 
+    if(out_train$weighted){
+      depths <- sapply(depths, \(x) sweep(x, 2, out_train$w, "*") |> rowSums())
+      depths <- depths / sum(out_train$w)
+    }else{
+
+      depths <- sapply(depths, rowMeans)
+
+    }
   }
 
   class <- apply(depths, 1, which.max)

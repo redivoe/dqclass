@@ -7,7 +7,20 @@
 dqcontour(u, X, S, n_dir = 1000, distr = "normal", weighted = FALSE)
 }
 \arguments{
-\item{weighted}{}
+\item{u}{Level of the contour that is required.}
+
+\item{X}{Data matrix with respect to which the depth is to be computed, with observations in rows and variables in columns.}
+
+\item{S}{A matrix containing the directions in the columns.}
+
+\item{n_dir}{Number of directions to consider. They are equally spaced in two dimensions and uniformly sampled for higher dimensions.}
+
+\item{distr}{The distribution that is fit to each univariate directional projection.}
+
+\item{weighted}{A logical indicating whether weights for the directions should be computed.}
+}
+\value{
+A matrix containing the points in that form the contour.
 }
 \description{
 Directional quantile contours
