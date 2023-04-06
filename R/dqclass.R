@@ -133,6 +133,7 @@ dqclass_train <- function(X, y,
 
 #' @rdname dqclass_train
 #' @param out_train Ouput list from `dqclass_train`.
+#' @export
 predict_dqclass <- function(out_train, X){
 
   X <- as.matrix(X)
@@ -174,6 +175,7 @@ predict_dqclass <- function(out_train, X){
 #' @rdname dqclass_train
 #' @param train,test Matrices for training and testing data sets.
 #'        The last column must contain the response class coded via integer numbers.
+#' @export
 dq_train_test <- function(train, test, n_dir = 500,
                           S,
                           distr = "fgld",
