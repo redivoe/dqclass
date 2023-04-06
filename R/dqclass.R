@@ -21,7 +21,7 @@ dqclass_train <- function(X, y,
                           n_dir = 1e3,
                           S,
                           predicted = FALSE,
-                          weighted = TRUE,
+                          weighted = FALSE,
                           sphered = TRUE){
 
   distr <- match.arg(distr)
@@ -127,10 +127,12 @@ dqclass_train <- function(X, y,
 }
 
 
-predict.dq <- function(dq, ...){
-  predict()
-}
+# predict.dq <- function(dq, ...){
+#   predict()
+# }
 
+#' @rdname dqclass_train
+#' @param out_train Ouput list from `dqclass_train`.
 predict_dqclass <- function(out_train, X){
 
   X <- as.matrix(X)
@@ -169,11 +171,13 @@ predict_dqclass <- function(out_train, X){
               "depths" = depths))
 }
 
-
+#' @rdname dqclass_train
+#' @param train,test Matrices for training and testing data sets.
+#'        The last column must contain the response class coded via integer numbers.
 dq_train_test <- function(train, test, n_dir = 500,
                           S,
                           distr = "fgld",
-                          weighted = TRUE, sphered = TRUE){
+                          weighted = FALSE, sphered = TRUE){
 
   X_train <- train[, -ncol(train)]
   y_train <- train[, ncol(train)]

@@ -2,6 +2,8 @@
 % Please edit documentation in R/dqclass.R
 \name{dqclass_train}
 \alias{dqclass_train}
+\alias{predict_dqclass}
+\alias{dq_train_test}
 \title{Directional quantile classifier}
 \usage{
 dqclass_train(
@@ -11,7 +13,19 @@ dqclass_train(
   n_dir = 1000,
   S,
   predicted = FALSE,
-  weighted = TRUE,
+  weighted = FALSE,
+  sphered = TRUE
+)
+
+predict_dqclass(out_train, X)
+
+dq_train_test(
+  train,
+  test,
+  n_dir = 500,
+  S,
+  distr = "fgld",
+  weighted = FALSE,
   sphered = TRUE
 )
 }
@@ -31,6 +45,11 @@ dqclass_train(
 \item{weighted}{A logical indicating whether weights for the directions should be computed.}
 
 \item{sphered}{A logical indicating whether groups should be sphered.}
+
+\item{out_train}{Ouput list from \code{dqclass_train}.}
+
+\item{train, test}{Matrices for training and testing data sets.
+The last column must contain the response class coded via integer numbers.}
 }
 \value{
 A list containing:

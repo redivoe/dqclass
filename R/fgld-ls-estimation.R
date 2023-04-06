@@ -11,6 +11,18 @@ get_X_fgld<-function(n){
   return(X)
 }
 
+#' @rdname fit_fgld_ls
+#' @param n_ Sample size2.
+#' @export
+get_X_fgld_rob<-function(n, n_){
+  x2 <- digamma(seq(1, n, len = n_)) - digamma(n + 1)
+
+  X <- cbind(seq(1, n, len = n_) / (n + 1),
+             x2,
+             rev(-x2))
+  return(X)
+}
+
 #' Least squares estimation for the \emph{fgld}
 #'
 #' @description
@@ -34,7 +46,7 @@ get_X_fgld<-function(n){
 #'
 #' @examples
 #' x <- rnorm(5)
-#' get_X_fgld(length(5))
+#' get_X_fgld(5)
 #' fit_fgld_ls(x)
 #'
 fit_fgld_ls<-function(y){
@@ -88,7 +100,7 @@ dQ <- function(x, theta, log = FALSE, Q, Qprime) {
 #' Quantile and cumulative distribution functions for the \emph{fgld}.
 #'
 #' @param u Vector of probabilities.
-#' @param x Vector of quantiles.
+#' @param x,q Vector of quantiles.
 #' @param theta Vector of parameters (of length 4) for the \emph{fgld}.
 #' @param log Logical indicating whether the density should be returned on the log scale.
 #'
@@ -170,7 +182,7 @@ plot_qfgld <- function(theta, add = FALSE, col = 2, ...){
   lim <- 1e-3
   u <- seq(lim, 1-lim, len = 3e2)
   if(add){
-    points(u, qfgld(u, theta), type = "l", col = col, lwd = 4, ylab = "Q(u)", ...)
+    graphics::points(u, qfgld(u, theta), type = "l", col = col, lwd = 4, ylab = "Q(u)", ...)
   }else{
     plot(u, qfgld(u, theta), type = "l", col = col, lwd = 4, ylab = "Q(u)", ...)
   }
@@ -180,7 +192,7 @@ plot_dfgld <- function(theta, lims = c(0.05, 0.95), add = FALSE, col = 2, ...){
   xlims <- qfgld(lims, theta)
   x_seq <- seq(xlims[1], xlims[2], len = 3e2)
   if(add){
-    points(x_seq, dfgld(x_seq, theta), type = "l", col = col, lwd = 4, ylab = "f(x)", ...)
+    graphics::points(x_seq, dfgld(x_seq, theta), type = "l", col = col, lwd = 4, ylab = "f(x)", ...)
   }else{
     plot(x_seq, dfgld(x_seq, theta), type = "l", col = col, lwd = 4, ylab = "f(x)", ...)
   }

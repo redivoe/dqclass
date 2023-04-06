@@ -20,7 +20,7 @@ dfgld(x, theta, log = FALSE)
 
 \item{theta}{Vector of parameters (of length 4) for the \emph{fgld}.}
 
-\item{x}{Vector of quantiles.}
+\item{x, q}{Vector of quantiles.}
 
 \item{log}{Logical indicating whether the density should be returned on the log scale.}
 }
