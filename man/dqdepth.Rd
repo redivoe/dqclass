@@ -2,7 +2,7 @@
 % Please edit documentation in R/dqdepth.R
 \name{dqdepth}
 \alias{dqdepth}
-\title{Directional quantile depth}
+\title{Integrated rank-weighted depth}
 \usage{
 dqdepth(
   z,
@@ -10,7 +10,7 @@ dqdepth(
   S,
   n_dir = 1000,
   distr = "normal",
-  sphered = TRUE,
+  sphered = FALSE,
   weighted = FALSE
 )
 }
@@ -25,7 +25,7 @@ dqdepth(
 
 \item{distr}{The distribution that is fit to each univariate directional projection.}
 
-\item{sphered}{A logical indicating whether groups should be sphered.}
+\item{sphered}{A logical indicating whether the depth should be computed on the sphered data.}
 
 \item{weighted}{A logical indicating whether weights for the directions should be computed.}
 }
@@ -33,11 +33,11 @@ dqdepth(
 A list containing:
 \itemize{
 \item \code{theta}: a list of dimension \code{n_dir} containing the estimated parameters for each univariate directional projection.
-\item \code{depths}: a vector with the computed depths for the input data \code{X}.
+\item \code{depths}: a vector with the computed depths for the targe points in \code{z}.
 }
 }
 \description{
-Computes the depth based on directional quantiles for a data matrix \eqn{X}.
+Computes the integrated rank-weighted depth based on a data matrix \eqn{X}.
 }
 \examples{
 library(ggplot2)

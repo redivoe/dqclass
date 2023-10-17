@@ -13,9 +13,9 @@ get_quantiles <- function(u, theta, distr){
 }
 
 
-#' Directional quantile depth
+#' Integrated rank-weighted depth
 #'
-#' Computes the depth based on directional quantiles for a data matrix \eqn{X}.
+#' Computes the integrated rank-weighted depth based on a data matrix \eqn{X}.
 #'
 #' @param z Point(s) whose depth is to be computed. If omitted the depths are computed for the points in `X`.
 #' @param X Data matrix with respect to which the depth is to be computed, with observations in rows and variables in columns.
@@ -23,11 +23,11 @@ get_quantiles <- function(u, theta, distr){
 #' @param n_dir Number of directions to consider. They are equally spaced in two dimensions and uniformly sampled for higher dimensions.
 #' @param distr The distribution that is fit to each univariate directional projection.
 #' @param weighted A logical indicating whether weights for the directions should be computed.
-#' @param sphered A logical indicating whether groups should be sphered.
+#' @param sphered A logical indicating whether the depth should be computed on the sphered data.
 #'
 #' @return A list containing:
 #' * `theta`: a list of dimension `n_dir` containing the estimated parameters for each univariate directional projection.
-#' * `depths`: a vector with the computed depths for the input data `X`.
+#' * `depths`: a vector with the computed depths for the targe points in `z`.
 #'
 #' @export
 #'
@@ -48,19 +48,26 @@ dqdepth <- function(z,
                     S,
                     n_dir = 1e3,
                     distr = "normal",
-                    sphered = TRUE,
+                    sphered = FALSE,
                     weighted = FALSE) {
 
-  out <- dqdepth_fit(X = X, S = S, n_dir = n_dir, distr = distr, weighted = weighted)
+  out <- dqdepth_fit(X = X, S = S, n_dir = n_dir, distr = distr, sphered = sphered, weighted = weighted)
 
   if(missing(z)){
     z <- X
   }
+  if(is.null(dim(z))){
+    z <- matrix(z, ncol = length(z))
+  }
 
   zc <- t(t(z) - out$mu)
-  zc_sphered_proj <- zc %*% out$W %*% out$S
+  if(sphered){
+    zc_proj <- zc %*% out$W %*% out$S
+  }else{
+    zc_proj <- zc %*% out$S
+  }
 
-  depths <- get_depths(zc_sphered_proj, out$theta, distr, n_dir)
+  depths <- get_depths(zc_proj, out$theta, distr, n_dir)
 
   if(weighted){
     depths <- sweep(depths, MARGIN = 2, STATS = out$w, FUN = "*") |>
@@ -68,19 +75,24 @@ dqdepth <- function(z,
     depths <- depths / sum(out$w)
 
   }else{
-    depths <- rowMeans(depths)
+    if(is.null(dim(depths))){
+      depths <- sum(depths)
+    }else{
+      depths <- rowMeans(depths)
+    }
   }
 
   return(depths)
 }
 
-dqdepth_fit <- function(X, S, n_dir = 1e3, distr = "normal", weighted = FALSE){
+dqdepth_fit <- function(X, S, n_dir = 1e3, distr, sphered, weighted){
 
   fit_fun <- switch(
     distr,
     fgld = fit_fgld_ls,
     normal = function(x) c(mean(x), sd_floor(x)),
-    kde = kdeF
+    kde = kdeF,
+    ecdf = function(x) stats::ecdf(x = x)
   )
 
   if(missing(S)){
@@ -96,17 +108,24 @@ dqdepth_fit <- function(X, S, n_dir = 1e3, distr = "normal", weighted = FALSE){
   mu <- colMeans(X)
   Xc <- t(t(X) - mu)
 
-  W <- sphere_zca(Xc, TRUE)
+  if(sphered){
+    W <- sphere_zca(Xc, centered = TRUE)
+    Z <- Xc %*% W
+    Z_proj <- Z %*% S
+  }else{
+    Z_proj <- Xc %*% S
+  }
 
-  Z <- Xc %*% W
-  Z_proj <- Z %*% S
   theta <- apply(Z_proj, 2, fit_fun, simplify = FALSE)
 
   out <- list("theta" = theta,
-              "W" = W,
               "S" = S,
               "mu" = mu,
               "distr" = distr)
+
+  if(sphered){
+    out$W <- W
+  }
 
   if(weighted){
     depths <- get_depths(Z_proj, theta, distr, n_dir)
@@ -119,14 +138,16 @@ dqdepth_fit <- function(X, S, n_dir = 1e3, distr = "normal", weighted = FALSE){
   return(out)
 }
 
-#' Directional quantile contours
+
+#' Integrated rank-weighted depth contours
 #'
+#' Computes an approximation of the contour level, giving a set points with a predifined value of the depth.
 #'
 #' @inheritParams dqdepth
 #' @param u Level of the contour that is required.
 #'
 #' @return
-#' A matrix containing the points in that form the contour.
+#' A matrix containing as rows the points that form the contour.
 #'
 #' @export
 #'
@@ -144,13 +165,19 @@ dqcontour <- function(u,
                       S,
                       n_dir = 1e3,
                       distr = "normal",
+                      sphered = FALSE,
                       weighted = FALSE){
-  out <- dqdepth_fit(X = X, S = S, n_dir = n_dir, distr = distr, weighted = weighted)
+  out <- dqdepth_fit(X = X, S = S, n_dir = n_dir, distr = distr, sphered = sphered, weighted = weighted)
 
   q <- get_quantiles(u = u,
                      theta = out$theta,
                      distr = out$distr)
   C <- sweep(out$S, 2, q, "*")
-  C <- t(t(t(C) %*% solve(out$W)) + out$mu)
+  if(sphered){
+    C <- t(t(t(C) %*% solve(out$W)) + out$mu)
+  }else{
+    C <- t(C + out$mu)
+  }
+
   return(C)
 }

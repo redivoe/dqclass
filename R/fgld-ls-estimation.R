@@ -11,17 +11,6 @@ get_X_fgld<-function(n){
   return(X)
 }
 
-#' @rdname fit_fgld_ls
-#' @param n_ Sample size2.
-#' @export
-get_X_fgld_rob<-function(n, n_){
-  x2 <- digamma(seq(1, n, len = n_)) - digamma(n + 1)
-
-  X <- cbind(seq(1, n, len = n_) / (n + 1),
-             x2,
-             rev(-x2))
-  return(X)
-}
 
 #' Least squares estimation for the \emph{fgld}
 #'
@@ -59,7 +48,7 @@ fit_fgld_ls<-function(y){
     return(theta)
   } else{
 
-    removed <- list(2, 3, 4, c(2, 3), c(2, 4), c(2, 3, 4))
+    removed <- list(2, 3, 4, c(2, 3), c(2, 4), c(3, 4), c(2, 3, 4))
     theta <- lapply(removed, function(i) {
       theta <- qr.solve(X[, -i], y)
       for (j in 1:length(i)) {
@@ -198,3 +187,67 @@ plot_dfgld <- function(theta, lims = c(0.05, 0.95), add = FALSE, col = 2, ...){
   }
 }
 
+
+#' @rdname fit_fgld_ls
+#' @export
+fit_fgld_ls_obj<-function(y){
+  n <- length(y)
+  X <- get_X_fgld(n)
+  y <- sort(y)
+  qrX <- qr(X)
+  theta <- qr.coef(qrX, y)
+
+  if (!any(theta[-1] < 0)) {
+    res <- qr.resid(qrX, y)
+    obj <- sum(res^2)
+    return(list("theta" = theta,
+                "obj" = obj,
+                "res" = res))
+
+  } else{
+
+    removed <- list(2, 3, 4, c(2, 3), c(2, 4), c(3, 4), c(2, 3, 4))
+    obj <- numeric(length = length(removed))
+    theta <- vector(mode = "list", length = length(removed))
+
+    for(i in 1:length(removed)){
+      qrXi <- qr(X[, -removed[[i]]])
+      theta[[i]] <- qr.coef(qrXi, y)
+      for (j in 1:length(removed[[i]])) {
+        theta[[i]] <- append(theta[[i]], 0, removed[[i]][j] - 1)
+      }
+      obj[i] <- sum(qr.resid(qrXi, y)^2)
+    }
+
+    feasible <- sapply(theta, \(t) !any(t[-1] < 0))
+    i <- which.min(obj + ifelse(feasible, 0, Inf))
+    res <- qr.resid(qr(X[, -removed[[i]]]), y)
+
+    return(list("theta" = theta[[i]],
+                "obj" = obj[i],
+                "res" = res))
+  }
+
+}
+
+
+#' @rdname fit_fgld_ls
+#' @export
+fit_fgld_ls.quadprog <- function(y){
+  n <- length(y)
+  X <- get_X_fgld(n)
+  y <- sort(y)
+
+  A <- rbind(0, diag(rep(1, 3)))
+  b <- rep(0, 3)
+
+  out_solveQP <- quadprog::solve.QP(
+    Dmat = crossprod(X, X),
+    dvec = crossprod(X, y),
+    Amat = A,
+    bvec = b
+  )
+
+  return(out_solveQP$solution)
+
+}

@@ -3,26 +3,30 @@
 %   R/fgld-std-ls-estimation.R
 \name{get_X_fgld}
 \alias{get_X_fgld}
-\alias{get_X_fgld_rob}
 \alias{fit_fgld_ls}
+\alias{fit_fgld_ls_obj}
+\alias{fit_fgld_ls.quadprog}
 \alias{get_X_fgld_std}
 \alias{fit_fgld_std_ls}
+\alias{fit_fgldid_ls}
 \title{Least squares estimation for the \emph{fgld}}
 \usage{
 get_X_fgld(n)
 
-get_X_fgld_rob(n, n_)
-
 fit_fgld_ls(y)
+
+fit_fgld_ls_obj(y)
+
+fit_fgld_ls.quadprog(y)
 
 get_X_fgld_std(n)
 
 fit_fgld_std_ls(y)
+
+fit_fgldid_ls(y)
 }
 \arguments{
 \item{n}{Sample size.}
-
-\item{n_}{Sample size2.}
 
 \item{y}{Data from which to estimate the parameters.}
 }

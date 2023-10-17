@@ -51,7 +51,8 @@ get_depths <- function(X, theta_k, distr, n_dir){
     fgld = pfgld,
     normal = function(x, theta) stats::pnorm(q = x, mean = theta[1], sd = theta[2]),
     # kde = function(x, theta) rowMeans(pnorm(q = outer(x, theta$x, "-"), mean = 0, sd = theta$bw))
-    kde = function(x, theta) stats::approx(theta$x, theta$Fhat, xout = x, rule = 2, ties = "ordered")$y
+    kde = function(x, theta) stats::approx(theta$x, theta$Fhat, xout = x, rule = 2, ties = "ordered")$y,
+    ecdf = function(x, theta) theta(x)
   )
 
   depths <- sapply(1:n_dir, \(i) cdf(X[, i], theta_k[[i]])) |>
@@ -67,7 +68,8 @@ get_depth <- function(x, theta, distr){
     fgld = pfgld,
     normal = function(x, theta) stats::pnorm(q = x, mean = theta[1], sd = theta[2]),
     # kde = function(x, theta) rowMeans(pnorm(q = outer(x, theta$x, "-"), mean = 0, sd = theta$bw))
-    kde = function(x, theta) stats::approx(theta$x, theta$Fhat, xout = x, rule = 2, ties = "ordered")$y
+    kde = function(x, theta) stats::approx(theta$x, theta$Fhat, xout = x, rule = 2, ties = "ordered")$y,
+    ecdf = function(x, theta) theta(x)
   )
 
   depths <- cdf(x, theta) |>
@@ -76,10 +78,10 @@ get_depth <- function(x, theta, distr){
   return(depths)
 }
 
+
 ##--------------------------
 ##  Sphering and centering
 ##--------------------------
-
 
 #' Compute a sphering matrix
 #'

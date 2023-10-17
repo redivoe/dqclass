@@ -2,9 +2,17 @@
 % Please edit documentation in R/dqdepth.R
 \name{dqcontour}
 \alias{dqcontour}
-\title{Directional quantile contours}
+\title{Integrated rank-weighted depth contours}
 \usage{
-dqcontour(u, X, S, n_dir = 1000, distr = "normal", weighted = FALSE)
+dqcontour(
+  u,
+  X,
+  S,
+  n_dir = 1000,
+  distr = "normal",
+  sphered = FALSE,
+  weighted = FALSE
+)
 }
 \arguments{
 \item{u}{Level of the contour that is required.}
@@ -17,13 +25,15 @@ dqcontour(u, X, S, n_dir = 1000, distr = "normal", weighted = FALSE)
 
 \item{distr}{The distribution that is fit to each univariate directional projection.}
 
+\item{sphered}{A logical indicating whether the depth should be computed on the sphered data.}
+
 \item{weighted}{A logical indicating whether weights for the directions should be computed.}
 }
 \value{
-A matrix containing the points in that form the contour.
+A matrix containing as rows the points that form the contour.
 }
 \description{
-Directional quantile contours
+Computes an approximation of the contour level, giving a set points with a predifined value of the depth.
 }
 \examples{
 library(mvtnorm)

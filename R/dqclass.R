@@ -1,5 +1,5 @@
 
-#' Directional quantile classifier
+#' Integrated rank-weighted maximum depth classifier
 #'
 #' @inheritParams dqdepth
 #' @param X A data matrix with observations in rows and variables in columns.
@@ -179,7 +179,8 @@ predict_dqclass <- function(out_train, X){
 dq_train_test <- function(train, test, n_dir = 500,
                           S,
                           distr = "fgld",
-                          weighted = FALSE, sphered = TRUE){
+                          weighted = FALSE,
+                          sphered = FALSE){
 
   X_train <- train[, -ncol(train)]
   y_train <- train[, ncol(train)]

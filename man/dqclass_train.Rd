@@ -4,7 +4,7 @@
 \alias{dqclass_train}
 \alias{predict_dqclass}
 \alias{dq_train_test}
-\title{Directional quantile classifier}
+\title{Integrated rank-weighted maximum depth classifier}
 \usage{
 dqclass_train(
   X,
@@ -26,7 +26,7 @@ dq_train_test(
   S,
   distr = "fgld",
   weighted = FALSE,
-  sphered = TRUE
+  sphered = FALSE
 )
 }
 \arguments{
@@ -44,7 +44,7 @@ dq_train_test(
 
 \item{weighted}{A logical indicating whether weights for the directions should be computed.}
 
-\item{sphered}{A logical indicating whether groups should be sphered.}
+\item{sphered}{A logical indicating whether the depth should be computed on the sphered data.}
 
 \item{out_train}{Ouput list from \code{dqclass_train}.}
 
@@ -59,7 +59,7 @@ A list containing:
 }
 }
 \description{
-Directional quantile classifier
+Integrated rank-weighted maximum depth classifier
 }
 \examples{
 data("iris")
