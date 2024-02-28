@@ -29,3 +29,26 @@ fit_fgld_std_ls<-function(y){
   return(list("theta" = out_solveQP$solution,
               "obj" = out_solveQP$value))
 }
+
+
+
+#' @rdname fit_fgld_ls
+#' @export
+fit_fgldid_ls<-function(y){
+  n <- length(y)
+  X <- get_X_fgld(n)
+  y <- sort(y)
+
+  A <- cbind(rbind(0, diag(rep(1, 3))),
+             c(0, 0, -1, 1))
+  b <- rep(0, 4)
+
+  out_solveQP <- quadprog::solve.QP(
+    Dmat = crossprod(X, X),
+    dvec = crossprod(X, y),
+    Amat = A,
+    bvec = b
+  )
+
+  return(out_solveQP$solution)
+}
